@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html class="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Direct Links</title>
+<link rel="stylesheet" href="{{staticPath}}style/lib/main.css?v={{staticVersion}}">
+<link rel="stylesheet" href="{{staticPath}}style/dist/main.css?v={{staticVersion}}">
+<link rel="stylesheet" href="{{staticPath}}style/lib/font-icon/style.css?v={{staticVersion}}">
+<link rel="stylesheet" href="{{pluginHost}}static/page.css?v={{package.version}}">
+</head>
+<body>
+<div class="panel-body dl-panel">
+	<div class="dl-page-head">
+		<div class="dl-head-main">
+			<h2 data-t="title">直链分享</h2>
+			<p data-t="desc"></p>
+		</div>
+		<div class="dl-head-stats">
+			<span class="label label-blue-light"><span data-t="total">全部</span> <b id="stat-total">0</b></span>
+			<span class="label label-green-light"><span data-t="active">已启用</span> <b id="stat-active">0</b></span>
+			<span class="label label-grey-light"><span data-t="disabled">已停用</span> <b id="stat-disabled">0</b></span>
+		</div>
+	</div>
+
+	<div class="kodTable dl-table">
+		<div class="toolbar">
+			<div class="left">
+				<div class="btn-group btn-group-segment btn-group-sm" id="dl-status">
+					<span class="btn btn-default btn-active" data-status=""><span data-t="total">全部</span></span>
+					<span class="btn btn-default" data-status="1"><span data-t="active">已启用</span></span>
+					<span class="btn btn-default" data-status="0"><span data-t="disabled">已停用</span></span>
+				</div>
+				<div class="dl-date-range" id="dl-date-range">
+					<i class="font-icon ri-calendar-line dl-date-icon"></i>
+					<input type="date" id="dl-date-start" class="dl-date-input" data-t-title="startDate" title="开始日期">
+					<span class="dl-date-sep">~</span>
+					<input type="date" id="dl-date-end" class="dl-date-input" data-t-title="endDate" title="结束日期">
+					<i class="font-icon ri-close-line dl-date-clear hidden" id="dl-date-clear" data-t-title="clearDate" title="清除日期"></i>
+				</div>
+			</div>
+			<div class="right">
+				<div class="search-box">
+					<input type="text" id="dl-keyword" autocomplete="off" spellcheck="false" data-t-placeholder="search" placeholder="搜索文件名">
+					<i class="btn-close font-icon ri-close-line hidden" id="dl-clear" data-t-title="clear" title="清除"></i>
+					<i class="btn-search font-icon ri-search-line" id="dl-search"></i>
+				</div>
+				<button type="button" class="btn btn-default" id="dl-refresh">
+					<i class="font-icon ri-refresh-line"></i><span data-t="refresh">刷新</span>
+				</button>
+			</div>
+		</div>
+
+		<div class="content">
+			<div class="list-table" id="dl-list">
+				<div class="list-row title">
+					<div class="list-col col-name" data-t="name">文件</div>
+					<div class="list-col col-url" data-t="url">直链</div>
+					<div class="list-col col-size" data-t="size">大小</div>
+					<div class="list-col col-time" data-t="time">创建时间</div>
+					<div class="list-col col-views" data-t="views">访问 / 下载</div>
+					<div class="list-col col-status" data-t="status">状态</div>
+					<div class="list-col setting col-actions" data-t="actions">操作</div>
+				</div>
+			</div>
+			<div class="table-empty-info hidden" id="dl-empty"><span></span></div>
+			<div class="loading-msg dl-loading hidden" id="dl-loading">
+				<div class="loading-mask"></div>
+				<div class="loading-msg-content">
+					<div class="loading-msg-box">
+						<img class="dl-loading-img" src="{{staticPath}}images/common/loading-pin3.gif" alt="">
+						<img class="dl-loading-img dl-loading-img-dark" src="{{staticPath}}images/common/loading-pin3-dark.gif" alt="">
+						<div class="loader loader-moon"><div></div><div></div><div></div><div></div></div>
+					</div>
+					<div class="loading-msg-title" data-t="loading">操作中...</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="footerbar mt-5 hidden" id="dl-footerbar">
+			<div class="list-page" id="dl-pager"></div>
+			<div class="clear"></div>
+		</div>
+	</div>
+</div>
+
+<div class="dl-toast" id="dl-toast"></div>
+
+<script>window.__DL__ = {{BOOTSTRAP}};</script>
+<script src="{{pluginHost}}static/page.js?v={{package.version}}"></script>
+</body>
+</html>

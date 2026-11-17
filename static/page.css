@@ -1,0 +1,297 @@
+/* 直链分享页：视觉主体复用核心 CSS（style/lib/main.css、style/dist/main.css），
+   这里只补 iframe 内缺失的面板容器、列宽、分页与 toast 等局部规则。 */
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:#f0f2f5;overflow-y:auto;overflow-x:hidden}
+.hidden{display:none!important}
+
+/* 核心 .panel-body 的白底/圆角/外边距只命中 .admin-page/.setting-page 外壳，iframe 内补齐等效值 */
+.dl-panel{background:#fff;border-radius:4px;margin:10px;padding:15px 15px 48px;position:relative}
+
+/* 标题区 */
+.dl-page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:0 0 12px;border-bottom:1px solid #eee;margin-bottom:12px}
+.dl-head-main h2{margin:0;font-size:16px;font-weight:400;line-height:1.5;color:#444}
+.dl-head-main p{margin:4px 0 0;font-size:12px;color:#888}
+.dl-head-stats{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dl-head-stats .label{border-radius:20px;padding:.3em .7em;font-weight:400}
+.dl-head-stats b{margin-left:3px;font-weight:600}
+
+/* 工具栏/表格局部 */
+.dl-table .search-box input{width:200px}
+.dl-table .toolbar .right .btn .font-icon{margin-right:3px}
+.dl-table .content{min-height:300px;position:relative}
+.dl-table .list-row .list-col{white-space:nowrap}
+/* 固定表格布局，避免长文件名把后面的列挤出容器 */
+.dl-table .list-table{display:table;width:100%;table-layout:fixed}
+
+/* 列宽 */
+.col-name{width:26%}
+.col-url{width:26%}
+.col-size{width:7%}
+.col-time{width:13%}
+.col-views{width:10%}
+.col-status{width:7%}
+.col-actions{width:11%}
+
+/* 文件单元格：封面缩略图 + 文件名（名称本身已含扩展名，不再单独显示） */
+.dl-file-cell{display:flex;align-items:center;gap:8px;min-width:0}
+.dl-file-thumb{
+	position:relative;flex:0 0 32px;width:32px;height:32px;border-radius:3px;
+	background:#f4f6f9;color:#9aa7b8;display:flex;align-items:center;justify-content:center;
+	overflow:hidden;border:1px solid #eef0f3;
+}
+.dl-file-thumb .font-icon{font-size:17px;width:auto}
+.dl-file-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+.dl-file-thumb.dl-open-location{cursor:pointer;transition:border-color .18s,background-color .18s}
+.dl-file-thumb.dl-open-location:hover{border-color:#b7d4ff;background:#f5faff}
+.dl-panel .dl-table .list-table .list-row .dl-file-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#444;cursor:pointer;transition:color .18s}
+.dl-panel .dl-table .list-table .list-row .dl-file-name:hover{color:#1890ff}
+
+.dl-url-wrap{display:flex;align-items:center;gap:2px;min-width:0}
+.dl-url-wrap a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .18s}
+.dl-url-wrap a:hover{color:#1890ff}
+.dl-url-wrap .do-action{
+	flex:0 0 auto;width:22px;height:22px;line-height:22px;border-radius:3px;
+	cursor:pointer;color:#8c9aab;transition:color .18s,background-color .18s,transform .18s;
+}
+.dl-url-wrap .do-action:hover{color:#1890ff;background:#e6f7ff;transform:scale(1.12)}
+.dl-url-wrap .do-action:active{transform:scale(.94)}
+
+/* 复制/操作按钮统一增加过渡动效 */
+.dl-panel .list-col.setting .do-action{transition:color .18s,background-color .18s,transform .18s}
+.dl-panel .list-col.setting .do-action:hover{transform:scale(1.12)}
+.dl-panel .list-col.setting .do-action:active{transform:scale(.94)}
+
+/* 日期筛选 */
+.dl-date-range{
+	display:inline-flex;align-items:center;gap:4px;height:28px;margin-left:10px;
+	padding:0 6px 0 4px;border:1px solid #e6e6e6;border-radius:4px;background:#fff;
+	vertical-align:middle;transition:border-color .18s,box-shadow .18s;
+}
+.dl-date-range:focus-within{border-color:#75a1f0;box-shadow:0 0 0 3px rgba(117,161,240,.3)}
+.dl-date-range .dl-date-icon{color:#999;font-size:14px}
+.dl-date-range .dl-date-input{
+	border:none;outline:none;background:transparent;height:26px;width:112px;
+	font-size:12px;color:#444;padding:0 2px;font-family:inherit;
+}
+.dl-date-range .dl-date-sep{color:#bbb;font-size:12px;margin:0 1px}
+.dl-date-range .dl-date-clear{cursor:pointer;color:#bbb;font-size:13px;border-radius:50%;transition:color .18s,background-color .18s}
+.dl-date-range .dl-date-clear:hover{color:#ff4d4f;background:rgba(255,77,79,.12)}
+html.dark-mode .dl-date-range{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+html.dark-mode .dl-date-range .dl-date-input{color:#ddd;color-scheme:dark}
+
+.dl-meta{color:#888;font-variant-numeric:tabular-nums}
+.dl-meta b{color:#444;font-weight:600}
+
+/* 加载态：复用官方 .loading-msg（loading-pin3.gif + “操作中...”），仅处理暗色图片切换 */
+.dl-loading-img-dark{display:none}
+html.dark-mode .dl-loading-img{display:none}
+html.dark-mode .dl-loading-img-dark{display:inline-block}
+
+/* toast */
+.dl-toast{
+	position:fixed;left:50%;bottom:30px;transform:translate(-50%,10px);
+	background:rgba(0,0,0,.72);color:#fff;font-size:13px;line-height:1.5;
+	padding:8px 16px;border-radius:4px;opacity:0;pointer-events:none;
+	transition:opacity .2s,transform .2s;z-index:99;
+	max-width:80vw;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.dl-toast.is-error{background:rgba(255,77,79,.95)}
+.dl-toast.is-show{opacity:1;transform:translate(-50%,0)}
+
+/* 分页：与官方 $.fn.pageBox（vendor.js）同一套 DOM/CSS；
+   iframe 未加载 vendor.js，这里完整复刻其样式。 */
+.my-page-box{
+	color:#888;user-select:none;-moz-user-select:none;-khtml-user-select:none;
+	font-size:12px;border:1px solid #eee;border-radius:3px;
+	box-shadow:0 1px 2px rgba(0,0,0,.05);overflow:hidden;position:relative;
+}
+.my-page-box.data-only-one-page .page-content{display:none}
+.my-page-box.data-only-one-page input{display:none}
+.my-page-box.data-only-one-page .page-info{border:none}
+.my-page-box .page-content .page-cover{overflow:hidden;float:left}
+.my-page-box .page-content .page-cover ul{
+	position:relative;width:150px;overflow:hidden;list-style:none;
+	padding:0;margin:0;white-space:nowrap;
+}
+.my-page-box .page-content .page-to,
+.my-page-box .page-content ul li,
+.my-page-box .page-content ul .page-active-bg{
+	display:inline-block;width:30px;height:28px;line-height:28px;
+	text-align:center;list-style:none;cursor:pointer;margin-left:-1px;
+	transition:all .2s;
+}
+.my-page-box .page-content ul li.active,
+.my-page-box .page-content ul li.active:hover{color:#fff}
+.my-page-box .page-content ul li span{z-index:3;position:relative}
+.my-page-box .page-content .page-to{width:inherit;padding:0 .5em;min-width:15px}
+.my-page-box .page-content .page-to .font-icon{font-size:16px;display:inline-block;position:relative;top:-1px}
+.my-page-box .page-content .page-to.disable{opacity:.3;cursor:not-allowed}
+.my-page-box .page-content .page-to.disable:hover{background:none;color:inherit}
+.my-page-box .page-content .hidden{display:none}
+.my-page-box .page-content ul .page-active-bg{
+	position:absolute;top:0;left:0;border:1px solid #1890ff;
+	background-color:#1890ff;margin-left:-1px;z-index:2;transition:none;
+}
+.my-page-box .page-content .page-to:hover,
+.my-page-box .page-content ul li:hover{color:#1890ff;background:#def}
+.my-page-box .page-content,
+.my-page-box .page-info,
+.my-page-box .page-select{float:left}
+.my-page-box .page-info{
+	padding:0 4px;border:1px solid rgba(150,150,150,.1);
+	border-top:none;border-bottom:none;margin:0 5px;
+	height:28px;line-height:28px;position:relative;
+}
+.my-page-box .page-info-text{padding-left:32px}
+.my-page-box.data-only-one-page .page-info-text{padding-left:0}
+.my-page-box .page-info input{
+	width:25px;height:18px;line-height:18px;color:inherit;
+	border:1px solid #e5e5e5;text-align:center;padding:0 1px;
+	border-radius:3px;outline:none;position:absolute;top:4px;
+}
+.my-page-box .page-info input:hover{border-color:#40a9ff}
+.my-page-box .page-info input:active,
+.my-page-box .page-info input:focus{border-color:#40a9ff;box-shadow:0 0 0 2px rgba(24,144,255,.2)}
+.my-page-box .page-select{margin-right:-15px}
+.my-page-box .page-select select{
+	appearance:none;-moz-appearance:none;-webkit-appearance:none;
+	background-image:none!important;filter:none!important;
+	border:1px solid #e5e5e5;color:inherit;outline:none;
+	padding:0 .5em;padding-right:15px;height:20px!important;
+	margin-top:3px;line-height:20px;border-radius:3px;
+}
+.my-page-box .page-select select:hover{border-color:#40a9ff;box-shadow:0 0 0 2px rgba(24,144,255,.2)}
+.my-page-box .page-select .select-icon{
+	position:relative;left:-21px;top:-2px;display:inline-block;
+	width:16px;height:20px;line-height:20px;text-align:center;pointer-events:none;
+}
+.my-page-box .page-select select,
+.my-page-box .page-info input{
+	border-color:rgba(150,150,150,.1);background:rgba(200,200,200,.08);transition:all .2s;
+}
+.my-page-box .page-content ul li span.num-3{zoom:.9}
+.my-page-box .page-content ul li span.num-4{zoom:.75}
+.my-page-box .page-content ul li span.num-5{zoom:.65}
+.my-page-box .page-content ul li span.num-6{zoom:.6}
+.my-page-box .page-content .page-to,
+.my-page-box .page-content ul li,
+.my-page-box .page-content ul .page-active-bg{border:none}
+.clear{clear:both}
+html.dark-mode .my-page-box .page-select select,
+html.dark-mode .my-page-box .page-info input{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:#ddd}
+
+/* 删除确认弹窗：复用核心 artDialog 的 .aui-* 结构与样式，这里只补容器和遮罩 */
+.dl-confirm-mask{
+	position:fixed;inset:0;z-index:9999;display:flex;align-items:flex-start;justify-content:center;
+	padding-top:15vh;background:rgba(0,0,0,.2);
+}
+.dl-confirm-box{width:350px;max-width:calc(100vw - 40px)}
+.dl-confirm-box .aui-outer{background:#fff;border-radius:4px;overflow:hidden;box-shadow:0 6px 40px rgba(0,0,0,.25)}
+.dl-confirm-box .aui-header{padding:0;border:none;background:transparent}
+/* iframe 内未加载 kod-svg-font，关闭按钮改用 remixicon，避免显示为方块 */
+.dl-confirm-box .aui-close:before{font-family:"remixicon" !important;content:"\eb99" !important;font-size:15px;line-height:30px;padding:0}
+.dl-confirm-box .aui-icon-bg{width:48px;height:48px;margin:10px 0 10px 10px;background-position:center center;background-repeat:no-repeat}
+.dl-confirm-box .aui-content{text-align:left;color:#444}
+.dl-confirm-box .aui-content h5{margin:0 0 8px;font-size:13px;font-weight:400;line-height:1.5;color:#444}
+.dl-confirm-file{color:#888;font-size:12px;word-break:break-all}
+.dl-confirm-box .aui-buttons{text-align:right;white-space:nowrap}
+
+/* 暗色：跟随父页面 html.dark-mode（核心暗色规则已覆盖表格/按钮/搜索框/分页） */
+html.dark-mode body{background:#1c1c1c;color:#ddd}
+html.dark-mode .dl-panel{background:#262626}
+html.dark-mode .dl-page-head{border-color:rgba(255,255,255,.1)}
+html.dark-mode .dl-head-main h2{color:#ddd}
+html.dark-mode .dl-head-main p{color:#b7b7b7}
+html.dark-mode .dl-meta{color:#b7b7b7}
+html.dark-mode .dl-meta b{color:#eee}
+html.dark-mode .dl-toast{background:rgba(0,0,0,.88)}
+html.dark-mode .dl-file-thumb{background:#333;border-color:rgba(255,255,255,.08);color:#8e8e8e}
+html.dark-mode .dl-file-thumb.dl-open-location:hover{background:rgba(24,144,255,.12);border-color:rgba(24,144,255,.4)}
+html.dark-mode .dl-panel .dl-table .list-table .list-row .dl-file-name{color:#ddd}
+html.dark-mode .dl-panel .dl-table .list-table .list-row .dl-file-name:hover{color:#4aa3ff}
+html.dark-mode .dl-url-wrap .do-action{color:#9aa7b8}
+html.dark-mode .dl-url-wrap .do-action:hover{color:#4aa3ff;background:rgba(24,144,255,.16)}
+html.dark-mode .dl-confirm-box .aui-outer{background:#303030;box-shadow:0 6px 30px rgba(0,0,0,.5)}
+html.dark-mode .dl-confirm-box .aui-main{background:#303030}
+html.dark-mode .dl-confirm-box .aui-content,
+html.dark-mode .dl-confirm-box .aui-content h5{color:#ddd}
+html.dark-mode .dl-confirm-file{color:#b7b7b7}
+html.dark-mode .dl-confirm-box .aui-buttons{background:#2a2a2a;border-color:transparent}
+
+/* ===== 手机/窄屏适配 =====
+   与后台直链管理页、核心 .app-wap-small 的处理一致：
+   工具栏换行、表格给最小像素宽度并由 .content 横向滚动、分页隐藏页码条。 */
+@media (max-width: 1000px){
+	.dl-panel{margin:8px;padding:12px 10px 52px}
+
+	.dl-page-head{flex-direction:column;align-items:stretch;gap:8px;padding-bottom:10px;margin-bottom:10px}
+	.dl-head-stats{gap:4px}
+
+	.dl-table .toolbar{display:block;padding-bottom:8px}
+	.dl-table .toolbar>div{display:block}
+	.dl-table .toolbar .left{display:flex;flex-wrap:wrap;align-items:center;gap:8px;text-align:left}
+	.dl-table .toolbar .left>*{display:inline-block}
+	.dl-table .toolbar .right{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px}
+	.dl-table .toolbar .right .btn{margin-left:0}
+	.dl-table .search-box{flex:1 1 140px;min-width:120px}
+	.dl-table .search-box input{width:100%}
+	.dl-date-range{margin-left:0}
+
+	.dl-table .list-table{width:900px;min-width:900px;table-layout:fixed}
+	.dl-table .content{overflow-x:auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
+	.dl-table .list-row .list-col{padding:8px 8px}
+	/* 手机列宽：时间列加宽避免时间被截断，操作列保证 4 个图标不被裁掉 */
+	.col-name{width:20%}
+	.col-url{width:24%}
+	.col-size{width:7%}
+	.col-time{width:15%}
+	.col-views{width:10%}
+	.col-status{width:8%}
+	.col-actions{width:16%}
+	.dl-panel .list-col.setting .do-action{width:28px;height:28px;line-height:28px;font-size:16px;box-sizing:border-box}
+	/* 开关自带 0.8em 右外边距，窄单元格会产生溢出省略号 */
+	.col-status label em{margin-right:0}
+	.dl-url-wrap .do-action{width:26px;height:26px;line-height:26px;font-size:15px}
+
+	.my-page-box{display:flex;align-items:center;justify-content:center;max-width:100%;white-space:nowrap;overflow-x:auto}
+	.my-page-box .page-content,
+	.my-page-box .page-info,
+	.my-page-box .page-select{float:none;display:flex;align-items:center;flex:0 0 auto}
+	.my-page-box .page-content .page-to{padding:0 6px;width:auto;min-width:26px;flex:0 0 auto}
+	.my-page-box .page-content .clear,
+	.my-page-box>.clear{display:none}
+	.my-page-box .page-content .page-cover{display:none}
+	.my-page-box .page-info{position:relative;margin:0 4px}
+	.my-page-box .page-select{margin-right:0}
+	/* 给下拉箭头留出位置，避免和“20 条/页”文字重叠 */
+	.my-page-box .page-select select{padding-right:20px}
+	.my-page-box .page-select .select-icon{left:-20px;top:0;line-height:20px}
+	.dl-footerbar .list-page{float:none;text-align:center}
+
+	.dl-toast{max-width:90vw;white-space:normal;word-break:break-all;text-align:center}
+}
+
+/* 超窄屏（≤420）：分页去掉记录数、压缩翻页按钮，保证一行放下不横向溢出 */
+@media (max-width: 420px){
+	.my-page-box .page-info .grey-6{display:none}
+	.my-page-box .page-content .page-to{padding:0 4px;min-width:22px}
+	.my-page-box .page-select select{padding-right:16px}
+	.my-page-box .page-select .select-icon{left:-17px}
+}
+
+@media (max-width: 560px){
+	.dl-panel{margin:6px;padding:10px 8px 48px}
+
+	.dl-head-main h2{font-size:15px}
+	.dl-head-stats .label{font-size:12px;padding:.25em .6em}
+
+	/* 日期范围独占一行，两个日期输入均分宽度 */
+	.dl-date-range{flex:1 1 100%;margin-left:0}
+	.dl-date-range .dl-date-input{flex:1;min-width:0;width:auto}
+	.dl-date-range .dl-date-sep{margin:0}
+
+	.dl-confirm-mask{padding-top:10vh}
+	.dl-confirm-box{width:auto;margin:0 12px}
+}

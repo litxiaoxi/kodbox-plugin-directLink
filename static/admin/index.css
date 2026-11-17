@@ -1,0 +1,234 @@
+/* 直链管理页：主体复用核心 .panel-body / .kodTable / .kui-* / .label 样式，
+   这里只补充标题区、筛选器、列宽与文本省略等局部规则。 */
+
+.dl-admin-page .dl-admin-head{
+	display:flex;align-items:flex-start;justify-content:space-between;
+	gap:12px;flex-wrap:wrap;padding:0 0 12px;border-bottom:1px solid #eee;margin-bottom:12px;
+}
+.dl-admin-page .dl-admin-title h2{margin:0;font-size:16px;font-weight:400;line-height:1.5;color:#444}
+.dl-admin-page .dl-admin-title p{margin:4px 0 0;font-size:12px;color:#888}
+.dl-admin-page .dl-admin-stats{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dl-admin-page .dl-admin-stats .label{border-radius:20px;padding:.3em .7em;font-weight:400}
+.dl-admin-page .dl-admin-stats b{margin-left:3px;font-weight:600}
+
+.dl-admin-page .dl-admin-table .search-box input{width:180px}
+.dl-admin-page .dl-admin-table .toolbar .right .btn .font-icon{margin-right:3px}
+.dl-admin-page .dl-admin-table .content{min-height:300px;position:relative}
+.dl-admin-page .dl-admin-table .list-row .list-col{white-space:nowrap}
+/* 固定表格布局，避免长文件名把后面的列挤出容器 */
+.dl-admin-page .dl-admin-list-table{display:table;width:100%;table-layout:fixed}
+.dl-admin-page .dl-admin-list-table .list-col{overflow:hidden}
+
+/* 列宽 */
+.dl-admin-page .col-check{width:5%}
+.dl-admin-page .col-name{width:24%}
+.dl-admin-page .col-url{width:20%}
+.dl-admin-page .col-user{width:12%}
+.dl-admin-page .col-time{width:10%}
+.dl-admin-page .col-views{width:8%}
+.dl-admin-page .col-status{width:6%}
+.dl-admin-page .col-act{width:15%}
+
+/* 文件单元格：封面缩略图 + 名称 + 路径（路径已去掉 {source:xx} 前缀） */
+.dl-admin-page .dl-file-cell{display:flex;align-items:center;gap:8px;min-width:0}
+.dl-admin-page .dl-file-thumb{
+	position:relative;flex:0 0 32px;width:32px;height:32px;border-radius:3px;
+	background:#f4f6f9;color:#9aa7b8;display:flex;align-items:center;justify-content:center;
+	overflow:hidden;border:1px solid #eef0f3;
+}
+.dl-admin-page .dl-file-thumb .font-icon{font-size:17px;width:auto}
+.dl-admin-page .dl-file-thumb img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+.dl-admin-page .dl-file-thumb.dl-open-location{cursor:pointer;transition:border-color .18s,background-color .18s}
+.dl-admin-page .dl-file-thumb.dl-open-location:hover{border-color:#b7d4ff;background:#f5faff}
+.dl-admin-page .dl-file-main{flex:1;min-width:0}
+.dl-admin-page .kodTable .dl-admin-list-table .list-row .dl-admin-file-name{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#444;cursor:pointer;transition:color .18s}
+.dl-admin-page .kodTable .dl-admin-list-table .list-row .dl-admin-file-name:hover{color:#1890ff}
+
+.dl-admin-page .dl-url-wrap{display:flex;align-items:center;gap:2px;min-width:0}
+.dl-admin-page .dl-url-wrap a{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .18s}
+.dl-admin-page .dl-url-wrap a:hover{color:#1890ff}
+.dl-admin-page .dl-url-wrap .do-action{
+	flex:0 0 auto;width:22px;height:22px;line-height:22px;border-radius:3px;
+	cursor:pointer;color:#8c9aab;transition:color .18s,background-color .18s,transform .18s;
+}
+.dl-admin-page .dl-url-wrap .do-action:hover{color:#1890ff;background:#e6f7ff;transform:scale(1.12)}
+.dl-admin-page .dl-url-wrap .do-action:active{transform:scale(.94)}
+
+/* 复制/操作按钮悬停动效 */
+.dl-admin-page .list-col.setting .do-action{transition:color .18s,background-color .18s,transform .18s}
+.dl-admin-page .list-col.setting .do-action:hover{transform:scale(1.12)}
+.dl-admin-page .list-col.setting .do-action:active{transform:scale(.94)}
+
+/* 用户列：头像 + 名称 */
+.dl-admin-page .dl-admin-user{display:inline-flex;align-items:center;gap:6px;max-width:100%;cursor:pointer;color:#444;vertical-align:middle}
+.dl-admin-page .dl-admin-user:hover .dl-admin-user-name{color:#1890ff}
+.dl-admin-page .dl-admin-user-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .18s}
+.dl-avatar{
+	position:relative;flex:0 0 22px;width:22px;height:22px;border-radius:50%;
+	display:inline-flex;align-items:center;justify-content:center;overflow:hidden;
+	background:#e8f1ff;color:#5b9bd5;border:1px solid rgba(0,0,0,.04);
+}
+.dl-avatar .font-icon{font-size:13px;width:auto;line-height:1}
+.dl-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#fff}
+
+/* 用户筛选下拉 */
+.dl-admin-page .dl-admin-user-filter{position:relative;display:inline-block;margin-left:8px;vertical-align:middle}
+.dl-admin-page .dl-admin-user-select{
+	display:inline-flex;align-items:center;gap:5px;height:28px;padding:0 8px;
+	border:1px solid #e6e6e6;border-radius:4px;background:#fff;color:#666;cursor:pointer;
+	font-size:12px;max-width:180px;transition:border-color .18s,box-shadow .18s,color .18s;
+}
+.dl-admin-page .dl-admin-user-select:hover{border-color:#75a1f0}
+.dl-admin-page .dl-admin-user-select.is-active{color:#1890ff;border-color:#b7d4ff;background:#f5faff}
+.dl-admin-page .dl-admin-user-select em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px}
+.dl-admin-page .dl-admin-user-select .font-icon{font-size:13px;color:#999}
+.dl-admin-page .dl-admin-user-select.is-active .font-icon{color:#1890ff}
+.dl-admin-page .dl-admin-user-dropdown{
+	position:absolute;left:0;top:34px;z-index:60;min-width:200px;max-width:280px;max-height:300px;
+	overflow:auto;padding:5px 0;background:#fff;border:1px solid #e6e6e6;border-radius:4px;
+	box-shadow:0 6px 20px rgba(0,0,0,.12);
+}
+.dl-admin-page .dl-admin-user-option{
+	display:flex;align-items:center;gap:8px;padding:6px 12px;cursor:pointer;font-size:12px;color:#555;
+	white-space:nowrap;transition:background-color .15s,color .15s;
+}
+.dl-admin-page .dl-admin-user-option:hover{background:#f0f7ff;color:#1890ff}
+.dl-admin-page .dl-admin-user-option.active{background:#e6f7ff;color:#1890ff}
+.dl-admin-page .dl-admin-user-option-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
+.dl-admin-page .dl-admin-user-option em{font-style:normal;color:#999;font-size:11px;padding-left:10px}
+.dl-admin-page .dl-admin-user-option .dl-avatar.is-all{background:#f2f3f5;color:#999}
+
+/* 日期筛选 */
+.dl-admin-page .dl-admin-date-range{
+	display:inline-flex;align-items:center;gap:4px;height:28px;margin-left:8px;padding:0 6px 0 4px;
+	border:1px solid #e6e6e6;border-radius:4px;background:#fff;vertical-align:middle;
+	transition:border-color .18s,box-shadow .18s;
+}
+.dl-admin-page .dl-admin-date-range:focus-within{border-color:#75a1f0;box-shadow:0 0 0 3px rgba(117,161,240,.3)}
+.dl-admin-page .dl-admin-date-range .font-icon{color:#999;font-size:14px}
+.dl-admin-page .dl-admin-date-range .dl-admin-date-start,
+.dl-admin-page .dl-admin-date-range .dl-admin-date-end{
+	border:none;outline:none;background:transparent;height:26px;width:96px;
+	font-size:12px;color:#444;padding:0 2px;font-family:inherit;
+}
+.dl-admin-page .dl-admin-date-range .dl-date-sep{color:#bbb;font-size:12px;margin:0 1px}
+.dl-admin-page .dl-admin-date-range .dl-admin-date-clear{cursor:pointer;color:#bbb;font-size:13px;border-radius:50%;transition:color .18s,background-color .18s}
+.dl-admin-page .dl-admin-date-range .dl-admin-date-clear:hover{color:#ff4d4f;background:rgba(255,77,79,.12)}
+
+.dl-admin-page .dl-admin-meta{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#888;font-variant-numeric:tabular-nums}
+.dl-admin-page .dl-admin-meta b{color:#444;font-weight:600}
+
+.dl-admin-page .dl-admin-batch{margin-left:5px}
+
+/* 后台分页结构复用 vendor.js 注入的 .my-page-box；当前页高亮由这里补（官方由 JS 定位 .page-active-bg） */
+.dl-admin-page .my-page-box .page-content ul li.active{background:#1890ff;border-color:#1890ff;color:#fff}
+
+/* 加载态：复用官方 .loading-msg（loading-pin3.gif + “操作中...”），仅处理暗色图片切换 */
+.dl-admin-page .dl-admin-loading-img-dark{display:none}
+html.dark-mode .dl-admin-page .dl-admin-loading-img{display:none}
+html.dark-mode .dl-admin-page .dl-admin-loading-img-dark{display:inline-block}
+
+/* 暗色：跟随核心 html.dark-mode */
+html.dark-mode .dl-admin-page .dl-admin-head{border-color:rgba(255,255,255,.1)}
+html.dark-mode .dl-admin-page .dl-admin-title h2{color:#ddd}
+html.dark-mode .dl-admin-page .dl-admin-title p{color:#b7b7b7}
+html.dark-mode .dl-admin-page .kodTable .dl-admin-list-table .list-row .dl-admin-file-name{color:#ddd}
+html.dark-mode .dl-admin-page .kodTable .dl-admin-list-table .list-row .dl-admin-file-name:hover{color:#4aa3ff}
+html.dark-mode .dl-admin-page .dl-admin-meta{color:#b7b7b7}
+html.dark-mode .dl-admin-page .dl-admin-meta b{color:#eee}
+html.dark-mode .dl-admin-page .dl-file-thumb{background:#333;border-color:rgba(255,255,255,.08);color:#8e8e8e}
+html.dark-mode .dl-admin-page .dl-file-thumb.dl-open-location:hover{background:rgba(24,144,255,.12);border-color:rgba(24,144,255,.4)}
+html.dark-mode .dl-admin-page .dl-admin-user{color:#ddd}
+html.dark-mode .dl-admin-page .dl-admin-user-select{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12);color:#b7b7b7}
+html.dark-mode .dl-admin-page .dl-admin-user-select.is-active{background:rgba(24,144,255,.16);border-color:rgba(24,144,255,.4);color:#4aa3ff}
+html.dark-mode .dl-admin-page .dl-admin-user-dropdown{background:#2a2a2a;border-color:rgba(255,255,255,.12);box-shadow:0 6px 24px rgba(0,0,0,.5)}
+html.dark-mode .dl-admin-page .dl-admin-user-option{color:#b7b7b7}
+html.dark-mode .dl-admin-page .dl-admin-user-option:hover{background:rgba(255,255,255,.08);color:#4aa3ff}
+html.dark-mode .dl-admin-page .dl-admin-user-option.active{background:rgba(24,144,255,.18);color:#4aa3ff}
+html.dark-mode .dl-admin-page .dl-admin-date-range{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+html.dark-mode .dl-admin-page .dl-admin-date-start,
+html.dark-mode .dl-admin-page .dl-admin-date-end{color:#ddd;color-scheme:dark}
+html.dark-mode .dl-avatar{background:rgba(24,144,255,.18);color:#6cb6ff;border-color:rgba(255,255,255,.06)}
+html.dark-mode .dl-admin-page .dl-url-wrap .do-action{color:#9aa7b8}
+html.dark-mode .dl-admin-page .dl-url-wrap .do-action:hover{color:#4aa3ff;background:rgba(24,144,255,.16)}
+
+/* ===== 手机/窄屏适配 =====
+   与核心 .app-wap-small 下的管理页一致：工具栏换行、表格由 .content 横向滚动，
+   不再把 8 列压进手机宽度；分页隐藏页码条，只保留翻页与总数。
+   断点 1000px 与核心给 <html> 加 app-wap-small 的阈值一致。 */
+@media (max-width: 1000px){
+	/* 标题与统计上下排布 */
+	.dl-admin-page .dl-admin-head{flex-direction:column;align-items:stretch;gap:8px;padding-bottom:10px;margin-bottom:10px}
+	.dl-admin-page .dl-admin-stats{gap:4px}
+
+	/* 工具栏：table-cell 改为可换行的 flex */
+	.dl-admin-page .dl-admin-table .toolbar{display:block;padding-bottom:8px}
+	.dl-admin-page .dl-admin-table .toolbar>div{display:block}
+	.dl-admin-page .dl-admin-table .toolbar .left{display:flex;flex-wrap:wrap;align-items:center;gap:8px;text-align:left}
+	.dl-admin-page .dl-admin-table .toolbar .left>*{display:inline-block}
+	.dl-admin-page .dl-admin-table .toolbar .right{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;text-align:left}
+	.dl-admin-page .dl-admin-table .toolbar .right .btn{margin:0}
+	.dl-admin-page .dl-admin-table .search-box{flex:1 1 140px;min-width:120px}
+	/* 核心移动端规则把 admin 搜索框固定成 80px，这里跟随自适应宽度 */
+	.dl-admin-page .dl-admin-table .search-box input{width:100% !important}
+	.dl-admin-page .dl-admin-user-filter{margin-left:0}
+	.dl-admin-page .dl-admin-date-range{margin-left:0}
+	.dl-admin-page .dl-admin-user-dropdown{max-width:calc(100vw - 40px)}
+
+	/* 表格：保持固定列宽，但给表格一个最小像素宽度，超出部分由 .content 横向滚动 */
+	.dl-admin-page .dl-admin-list-table{width:940px;min-width:940px;table-layout:fixed}
+	/* 手机列宽：时间列加宽避免时间被截断 */
+	.dl-admin-page .col-check{width:5%}
+	.dl-admin-page .col-name{width:22%}
+	.dl-admin-page .col-url{width:18%}
+	.dl-admin-page .col-user{width:10%}
+	.dl-admin-page .col-time{width:14%}
+	.dl-admin-page .col-views{width:11%}
+	.dl-admin-page .col-status{width:7%}
+	.dl-admin-page .col-act{width:13%}
+	/* 只接管横向滚动，纵向保持核心的 overflow-y:hidden，避免出现双重竖向滚动条 */
+	.dl-admin-page .dl-admin-table .content{overflow-x:auto;-webkit-overflow-scrolling:touch}
+	.dl-admin-page .dl-admin-list-table .list-row .list-col{padding:8px 8px}
+	/* 触控目标不小于 28px */
+	.dl-admin-page .list-col.setting .do-action{width:28px;height:28px;line-height:28px;font-size:16px;box-sizing:border-box}
+	/* 开关自带 0.8em 右外边距，窄单元格会产生溢出省略号 */
+	.dl-admin-page .col-status label em{margin-right:0}
+	.dl-admin-page .dl-url-wrap .do-action{width:26px;height:26px;line-height:26px;font-size:15px}
+
+	/* 分页：与核心移动端一致，隐藏页码条，保留翻页/总数/每页条数；
+	   窄屏改用 flex 排布，避免浮动在收缩容器里塌陷 */
+	.dl-admin-page .my-page-box{display:flex;align-items:center;justify-content:center;max-width:100%;white-space:nowrap;overflow-x:auto}
+	.dl-admin-page .my-page-box .page-content,
+	.dl-admin-page .my-page-box .page-info,
+	.dl-admin-page .my-page-box .page-select{float:none;display:flex;align-items:center;flex:0 0 auto}
+	.dl-admin-page .my-page-box .page-content .page-to{width:auto;min-width:26px;padding:0 6px;flex:0 0 auto}
+	.dl-admin-page .my-page-box .page-content .clear,
+	.dl-admin-page .my-page-box>.clear{display:none}
+	.dl-admin-page .my-page-box .page-content .page-cover{display:none}
+	.dl-admin-page .my-page-box .page-info{position:relative;margin:0 4px}
+	.dl-admin-page .my-page-box .page-select{margin-right:0}
+	/* 给下拉箭头留出位置，避免和“20 条/页”文字重叠 */
+	.dl-admin-page .my-page-box .page-select select{padding-right:20px !important}
+	.dl-admin-page .my-page-box .page-select .select-icon{left:-20px;top:0;line-height:20px}
+	.dl-admin-page .dl-admin-footer .list-page{float:none;text-align:center}
+}
+
+/* 超窄屏（≤420）：分页去掉记录数、压缩翻页按钮，保证一行放下不横向溢出 */
+@media (max-width: 420px){
+	.dl-admin-page .my-page-box .page-info .grey-6{display:none}
+	.dl-admin-page .my-page-box .page-content .page-to{padding:0 4px;min-width:22px}
+	.dl-admin-page .my-page-box .page-select select{padding-right:16px !important}
+	.dl-admin-page .my-page-box .page-select .select-icon{left:-17px}
+}
+
+@media (max-width: 560px){
+	/* 日期范围独占一行，两个输入框均分剩余宽度 */
+	.dl-admin-page .dl-admin-date-range{flex:1 1 100%;margin-left:0}
+	.dl-admin-page .dl-admin-date-range .dl-admin-date-start,
+	.dl-admin-page .dl-admin-date-range .dl-admin-date-end{flex:1;min-width:0;width:auto}
+	.dl-admin-page .dl-admin-date-range .dl-date-sep{margin:0}
+
+	.dl-admin-page .dl-admin-title h2{font-size:15px}
+	.dl-admin-page .dl-admin-stats .label{font-size:12px;padding:.25em .6em}
+	.dl-admin-page .dl-admin-table .toolbar .right .btn{padding:4px 8px}
+}

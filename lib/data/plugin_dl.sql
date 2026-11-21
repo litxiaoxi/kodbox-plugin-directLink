@@ -10,7 +10,7 @@ CREATE TABLE `plugin_dl` (
     `userID` bigint(20) unsigned NOT NULL DEFAULT '0' COMMENT '创建用户ID',
     `status` tinyint(3) unsigned NOT NULL DEFAULT '1' COMMENT '状态 1启用 0停用',
     `numView` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '访问次数',
-    `numDownload` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '下载次数',
+    `numDownload` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '已废弃:下载量并入 numView,仅保留字段兼容',
     `lastViewTime` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '最后访问时间',
     `createTime` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '创建时间',
     `modifyTime` int(11) unsigned NOT NULL DEFAULT '0' COMMENT '修改时间',

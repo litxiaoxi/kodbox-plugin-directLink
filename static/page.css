@@ -295,3 +295,80 @@ html.dark-mode .dl-confirm-box .aui-buttons{background:#2a2a2a;border-color:tran
 	.dl-confirm-mask{padding-top:10vh}
 	.dl-confirm-box{width:auto;margin:0 12px}
 }
+
+/* ===== 手机卡片布局（≤768）=====
+   窄屏下横向滚动的表格在手机里只能看到前两列、直链被裁掉，
+   改为卡片式：第一行文件名 + 开关，第二行整行直链，第三行大小/时间/访问量 + 操作按钮。
+   依赖 index.js 中 renderRow 的既有列结构与类名，无需改 DOM。 */
+@media (max-width: 768px){
+	/* 核心表体规则是 .kodTable .content .list-table .list-row（4 层选择器），
+	   这里的选择器必须同步带上 .content .list-table 才压得过它 */
+	.dl-table .content{overflow-x:hidden}
+	.dl-table .content .list-table{display:block;width:auto;min-width:0;table-layout:auto;border-collapse:separate}
+	.dl-table .content .list-table .list-row.title{display:none}
+
+	.dl-table .content .list-table .list-row.row-content{
+		display:grid;
+		grid-template-columns:auto auto 1fr auto;
+		grid-template-areas:
+			"name name name status"
+			"url url url url"
+			"size time views actions";
+		align-items:center;gap:6px 10px;
+		padding:10px;border-bottom:1px solid #f0f0f0;
+	}
+	.dl-table .content .list-table .list-row.row-content:nth-child(odd){background:transparent}
+	.dl-table .content .list-table .list-row.row-content:last-child{border-bottom:none}
+	.dl-table .content .list-table .list-row .list-col{padding:0;width:auto;min-width:0;white-space:normal;text-overflow:clip}
+
+	.dl-table .col-name{grid-area:name;min-width:0}
+	.dl-table .col-url{grid-area:url;min-width:0}
+	.dl-table .content .list-table .list-row .col-size{grid-area:size;white-space:nowrap}
+	.dl-table .content .list-table .list-row .col-time{grid-area:time;white-space:nowrap}
+	.dl-table .content .list-table .list-row .col-views{grid-area:views;white-space:nowrap}
+	.dl-table .col-status{grid-area:status;justify-self:end}
+	.dl-table .col-actions{grid-area:actions;justify-self:end;display:flex;align-items:center;gap:2px}
+	/* 直链条内已有复制按钮，操作列不再重复，给元信息留出宽度 */
+	.dl-table .content .list-table .list-row .col-actions .dl-copy{display:none}
+	.dl-table .col-size .dl-meta,
+	.dl-table .col-time .dl-meta,
+	.dl-table .col-views .dl-meta{font-size:12px}
+
+	/* 直链做成整行可点的浅色块，右侧复制按钮常驻 */
+	.dl-table .dl-url-wrap{
+		min-width:0;gap:4px;padding:2px 2px 2px 8px;
+		background:#f6f8fb;border:1px solid #eef0f3;border-radius:4px;
+	}
+	.dl-table .dl-url-wrap a{font-size:12px}
+	.dl-table .dl-url-wrap .do-action{width:28px;height:28px;line-height:28px;font-size:15px}
+	.dl-table .list-col.setting .do-action{width:28px;height:28px;line-height:28px;font-size:15px;box-sizing:border-box}
+
+	html.dark-mode .dl-table .content .list-table .list-row.row-content{border-bottom-color:rgba(255,255,255,.08)}
+	/* 核心用 .list-row:after 画分隔线，暗色下需要一起改色，否则是刺眼的白线 */
+	html.dark-mode .dl-table .content .list-table .list-row.row-content:after{border-top-color:rgba(255,255,255,.08)}
+	html.dark-mode .dl-table .content .list-table .list-row.row-content:last-child:after{display:none}
+	html.dark-mode .dl-table .dl-url-wrap{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
+
+	/* 日期筛选：原生日历图标与左侧自定义图标重复，且把输入区挤得很窄。
+	   隐藏原生图标（保留整块可点区域，点击任意位置都会弹出日期选择器），
+	   两个输入框均分整行、高度加大到适合手指操作 */
+	.dl-date-range{flex:1 1 100%;margin-left:0;height:34px;padding:0 8px 0 6px}
+	.dl-date-range .dl-date-input{
+		position:relative;flex:1 1 0;min-width:0;width:auto;height:32px;
+		font-size:13px;text-align:center;
+	}
+	.dl-date-range .dl-date-input::-webkit-calendar-picker-indicator{
+		position:absolute;left:0;top:0;right:0;bottom:0;
+		width:100%;height:100%;opacity:0;cursor:pointer;
+	}
+	.dl-date-range .dl-date-sep{margin:0 4px}
+}
+
+/* 超窄屏（≤380）：进一步压缩元信息字号与操作按钮，保证第三行不换行溢出 */
+@media (max-width: 380px){
+	.dl-table .list-row.row-content{gap:6px 6px;padding:10px 8px}
+	.dl-table .col-size .dl-meta,
+	.dl-table .col-time .dl-meta,
+	.dl-table .col-views .dl-meta{font-size:11px}
+	.dl-table .list-col.setting .do-action{width:24px;height:24px;line-height:24px;font-size:14px}
+}

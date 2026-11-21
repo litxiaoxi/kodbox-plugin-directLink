@@ -74,8 +74,11 @@ class dlPlugin extends PluginBase
 		static $list = false;
 		if($list === false){
 			$list = array();
-			foreach(get_class_methods($this) as $method){
-				$list[] = strtolower($method);
+			// get_class_methods 在类作用域内会返回 private 方法；
+			// 这里只认公开方法，避免 plugin/dl/initTable 之类路由绕过直链接管。
+			$ref = new ReflectionClass($this);
+			foreach($ref->getMethods(ReflectionMethod::IS_PUBLIC) as $method){
+				$list[] = strtolower($method->getName());
 			}
 			$list = array_values(array_unique($list));
 		}
@@ -93,15 +96,10 @@ class dlPlugin extends PluginBase
 		}
 		$this->initTable();
 
-		$name = _get($user,'nickName');
-		if(!$name) $name = _get($user,'name');
-		$lang = $this->lang();
 		$labels = $this->pageLabels();
 		$boot = array(
-			'api'    => urlApi('plugin/dl', null),
-			'user'   => $name,
-			'lang'   => $lang,
-			't'      => $labels,
+			'api' => urlApi('plugin/dl', null),
+			't'   => $labels,
 		);
 
 		$host = rtrim($this->pluginHost,'/').'/';
@@ -160,21 +158,27 @@ class dlPlugin extends PluginBase
 		}
 
 		$truePath = $info['path'];
+		// 匿名请求无法可靠还原 {driver} 等会话级路径，只允许 source 与物理 io 路径；
+		// 分享类路径已在前面单独拦截。
+		$trueParse = KodIO::parse($truePath);
+		$pathType  = _get($trueParse,'type');
+		if($pathType && $pathType != KodIO::KOD_SOURCE && $pathType != KodIO::KOD_IO){
+			show_json($this->t('dl.tips.pathType','该路径类型不支持生成直链','This path type cannot be shared as a direct link'),false);
+		}
+
 		$model = Model('plugin_dl');
 		$exists = $model->where(array('userID'=>$userID,'path'=>$truePath))->find();
 		if($exists){
-			// 旧记录对应文件已删除/在回收站时先清理，避免复用一条始终 404 的直链
-			if($this->fileInfo($exists['path'])){
-				show_json(array(
-					'id'    => intval($exists['id']),
-					'name'  => $exists['name'],
-					'token' => $exists['token'],
-					'url'   => $this->linkUrl($exists['token']),
-					'status'=> intval($exists['status']),
-					'exist' => true,
-				),true);
-			}
-			$model->where(array('id'=>intval($exists['id']),'userID'=>$userID))->delete();
+			// 复用已有直链。上面已确认当前文件可读，这里不再二次校验：
+			// 瞬时读取失败时若删除旧记录，会让所有已分发的链接永久失效。
+			show_json(array(
+				'id'    => intval($exists['id']),
+				'name'  => $exists['name'],
+				'token' => $exists['token'],
+				'url'   => $this->linkUrl($exists['token']),
+				'status'=> intval($exists['status']),
+				'exist' => true,
+			),true);
 		}
 
 		$token = $this->makeToken();
@@ -192,7 +196,6 @@ class dlPlugin extends PluginBase
 			'userID'     => $userID,
 			'status'     => 1,
 			'numView'    => 0,
-			'numDownload'=> 0,
 			'lastViewTime'=> 0,
 			'createTime' => $now,
 			'modifyTime' => $now,
@@ -230,14 +233,15 @@ class dlPlugin extends PluginBase
 		$pageNum = intval(_get($this->in,'pageNum',10));
 		$pageNum = $pageNum < 5 ? 5 : ($pageNum > 100 ? 100 : $pageNum);
 
+		// 核心 selectPage 会优先读取 $in 中的 page/pageNum（上限 100000），
+		// 不重置则上面的参数限制失效，可被请求方放大分页大小。
+		$model->selectPageReset();
 		$result = $model->where($where)->order('createTime desc')->selectPage($pageNum,$page);
 		if(!is_array($result)) $result = array();
 		$result['list'] = $this->listFormat(_get($result,'list',array()));
 		$statWhere = $this->notHidden($base,$hidden);
-		$result['stats'] = array(
-			'total'  => intval(Model('plugin_dl')->where($statWhere)->count()),
-			'active' => intval(Model('plugin_dl')->where($this->notHidden(array_merge($base,array('status'=>1)),$hidden))->count()),
-		);
+		$result['stats'] = $this->statusStats($statWhere);
+		unset($result['stats']['disable']);
 		show_json($result);
 	}
 
@@ -289,7 +293,9 @@ class dlPlugin extends PluginBase
 		}
 		$this->initTable();
 		$row = Model('plugin_dl')->where(array('token'=>$token,'status'=>1))->find();
-		if(!$row){
+		// MySQL 默认 utf8mb4_general_ci 对 token 列大小写不敏感，这里严格比对一次，
+		// 保证 mixed 类型 token 的大小写有效（SQLite 本身区分大小写）。
+		if(!$row || _get($row,'token') !== $token){
 			$this->failRateLimit();
 			$this->notFound();
 		}
@@ -315,10 +321,10 @@ class dlPlugin extends PluginBase
 		$isRangePart = $range && !preg_match('/^bytes=0-/i',$range);
 
 		$upData = array();
-		if(!$isRangePart && strtoupper(REQUEST_METHOD) !== 'HEAD'){
+		// 访问与下载统一计为访问量；同一次访问产生的重复请求（见 markViewed）只计一次
+		if(!$isRangePart && REQUEST_METHOD !== 'HEAD' && $this->markViewed($row)){
 			$upData['numView']      = array('exp','numView + 1');
 			$upData['lastViewTime'] = time();
-			if($download){$upData['numDownload'] = array('exp','numDownload + 1');}
 		}
 		// 文件被重命名后直链仍指向同一文件（路径基于 sourceID），这里同步最新的名称/大小;
 		$name = _get($info,'name','');
@@ -448,7 +454,10 @@ class dlPlugin extends PluginBase
 		$pageNum = intval(_get($this->in,'pageNum',10));
 		$pageNum = $pageNum < 5 ? 5 : ($pageNum > 100 ? 100 : $pageNum);
 
-		$result = Model('plugin_dl')->where($where)->order('createTime desc')->selectPage($pageNum,$page);
+		$model = Model('plugin_dl');
+		// 同上：避免核心 selectPage 从 $in 读取未限制的 pageNum/page
+		$model->selectPageReset();
+		$result = $model->where($where)->order('createTime desc')->selectPage($pageNum,$page);
 		if(!is_array($result)) $result = array();
 		$result['list'] = $this->listFormat(_get($result,'list',array()),true);
 
@@ -486,11 +495,7 @@ class dlPlugin extends PluginBase
 		$result['users'] = $users;
 
 		$statWhere = $this->notHidden(array(),$hidden);
-		$result['stats'] = array(
-			'total'   => intval(Model('plugin_dl')->where($statWhere)->count()),
-			'active'  => intval(Model('plugin_dl')->where($this->notHidden(array('status'=>1),$hidden))->count()),
-			'disable' => intval(Model('plugin_dl')->where($this->notHidden(array('status'=>0),$hidden))->count()),
-		);
+		$result['stats'] = $this->statusStats($statWhere);
 		show_json($result);
 	}
 
@@ -602,6 +607,27 @@ class dlPlugin extends PluginBase
 	}
 
 	/**
+	 * 一次分组查询得到 total/active/disable，避免每次列表 3 次全表 COUNT
+	 * @return array
+	 */
+	private function statusStats($where){
+		$rows = Model('plugin_dl')->where($where)
+			->field(array('status','count(id)'=>'num'))->group('status')->select();
+		$rows = is_array($rows) ? $rows : array();
+		$stats = array('total'=>0,'active'=>0,'disable'=>0);
+		foreach($rows as $row){
+			$num = intval(_get($row,'num',0));
+			$stats['total'] += $num;
+			if(intval(_get($row,'status',0)) == 1){
+				$stats['active'] += $num;
+			}else{
+				$stats['disable'] += $num;
+			}
+		}
+		return $stats;
+	}
+
+	/**
 	 * 追加“排除回收站直链”的查询条件
 	 */
 	private function notHidden($where,$hidden){
@@ -629,6 +655,23 @@ class dlPlugin extends PluginBase
 		$token = _get($this->in,'CSRF_TOKEN','');
 		if($token && $token === Cookie::get('CSRF_TOKEN')) return;
 		show_json('CSRF_TOKEN error!',false);
+	}
+
+	/**
+	 * 同一次访问去重。
+	 * 浏览器直接打开视频直链时会先后发出两次完整请求：一次不带 Range 的文档导航请求，
+	 * 一次 Range: bytes=0- 的媒体请求；两者都会到达这里且无法从请求本身区分，
+	 * 因此按 直链 + 客户端（IP/UA）在短时间窗口内只计一次访问。
+	 * @return bool 本次请求是否计数
+	 */
+	private function markViewed($row){
+		$ip = function_exists('get_client_ip') ? get_client_ip() : '';
+		if(!$ip) return true;
+		$ua = _get($_SERVER,'HTTP_USER_AGENT','');
+		$key = 'plugin_dl_view_'.md5(_get($row,'id','').'|'.$ip.'|'.$ua);
+		if(Cache::get($key)) return false;
+		Cache::set($key,1,5);
+		return true;
 	}
 
 	/**
@@ -674,8 +717,9 @@ class dlPlugin extends PluginBase
 				$allowIO = $isRoot || intval(_get($roleInfo,'allowAction.admin.storage.edit',0)) == 1;
 				return $allowIO && !empty($this->config['ADMIN_ALLOW_IO']);
 			}
-			// 分享类路径无法在匿名请求中复检分享状态，按失效处理；其他类型在创建时已校验
-			if($ioType != KodIO::KOD_SOURCE) return !in_array($ioType,$this->sharePathTypes());
+			// 白名单：只有 source 路径能在匿名请求中做实时权限复检；
+			// 分享类、{driver} 等类型无法安全复检，一律按失效处理。
+			if($ioType != KodIO::KOD_SOURCE) return false;
 			if($isRoot && !empty($this->config['ADMIN_ALLOW_SOURCE'])) return true;
 
 			$sourceID = intval(_get($parse,'id',0));
@@ -812,7 +856,7 @@ class dlPlugin extends PluginBase
 			$item['userID'] = intval($item['userID']);
 			$item['status'] = intval($item['status']);
 			$item['numView'] = intval($item['numView']);
-			$item['numDownload'] = intval($item['numDownload']);
+			unset($item['numDownload']);	// 下载量已并入访问量，不再对外输出
 			$item['lastViewTime'] = intval($item['lastViewTime']);
 			$item['createTime'] = intval($item['createTime']);
 			$item['ext'] = strtolower(_get($item,'ext',''));
@@ -859,26 +903,28 @@ class dlPlugin extends PluginBase
 	private function initTable(){
 		static $done = false;
 		if($done) return;
-		// 已初始化过则直接返回，避免匿名直链下载每次都执行 SHOW TABLES
-		if(in_array(strval(Model('SystemOption')->get('tableReady','dl')),array('1'),true)){
+
+		// tableReady 存最近一次校验时间：短期内直接信任，避免匿名直链每次请求都查表；
+		// 超过间隔（或旧版本写入的 "1"）重新比对表是否存在，表被删除/恢复丢失时可自动重建，
+		// 而不是永久报 "table doesn't exist"。
+		$now  = time();
+		$last = Model('SystemOption')->get('tableReady','dl');
+		if(is_numeric($last) && intval($last) > 0 && $now - intval($last) < 60){
 			$done = true;
 			return;
 		}
 		$tables = Model()->db()->getTables();
-		if(in_array('plugin_dl',$tables)){
-			Model('SystemOption')->set('tableReady','1','dl');
-			$done = true;
-			return;
+		if(!in_array('plugin_dl',$tables)){
+			$path = $this->pluginPath.'lib/data/plugin_dl.sql';
+			if(getDatabaseType() == 'sqlite'){
+				$path = $this->pluginPath.'lib/data/plugin_dl.sqlite.sql';
+			}
+			$sqlArr = sqlSplit(file_get_contents($path));
+			foreach($sqlArr as $sql){
+				Model()->db()->execute($sql);
+			}
 		}
-		$path = $this->pluginPath.'lib/data/plugin_dl.sql';
-		if(getDatabaseType() == 'sqlite'){
-			$path = $this->pluginPath.'lib/data/plugin_dl.sqlite.sql';
-		}
-		$sqlArr = sqlSplit(file_get_contents($path));
-		foreach($sqlArr as $sql){
-			Model()->db()->execute($sql);
-		}
-		Model('SystemOption')->set('tableReady','1','dl');
+		Model('SystemOption')->set('tableReady',$now,'dl');
 		$done = true;
 	}
 

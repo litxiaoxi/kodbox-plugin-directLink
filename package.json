@@ -2,7 +2,7 @@
 	"id":"dl",
 	"name":"{{LNG['dl.meta.name']}}",
 	"title":"{{LNG['dl.meta.title']}}",
-	"version":"1.0",
+	"version":"1.0.3",
 	"source":{
 		"className":"font-icon ri-link-m bg-blue-6"
 	},
@@ -11,7 +11,7 @@
 	"keywords":"direct link,share",
 	"auther":{
 		"copyright":"Litx",
-		"homePage":"http://litx.cn"
+		"homePage":"https://litx.cn"
 	},
 	"configItem":{
 		"pluginAuth":{

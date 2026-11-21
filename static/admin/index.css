@@ -11,7 +11,7 @@
 .dl-admin-page .dl-admin-stats .label{border-radius:20px;padding:.3em .7em;font-weight:400}
 .dl-admin-page .dl-admin-stats b{margin-left:3px;font-weight:600}
 
-.dl-admin-page .dl-admin-table .search-box input{width:180px}
+.dl-admin-page .dl-admin-table .search-box input{width:180px;box-sizing:border-box}
 .dl-admin-page .dl-admin-table .toolbar .right .btn .font-icon{margin-right:3px}
 .dl-admin-page .dl-admin-table .content{min-height:300px;position:relative}
 .dl-admin-page .dl-admin-table .list-row .list-col{white-space:nowrap}
@@ -168,9 +168,11 @@ html.dark-mode .dl-admin-page .dl-url-wrap .do-action:hover{color:#4aa3ff;backgr
 	.dl-admin-page .dl-admin-table .toolbar .left>*{display:inline-block}
 	.dl-admin-page .dl-admin-table .toolbar .right{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;text-align:left}
 	.dl-admin-page .dl-admin-table .toolbar .right .btn{margin:0}
-	.dl-admin-page .dl-admin-table .search-box{flex:1 1 140px;min-width:120px}
-	/* 核心移动端规则把 admin 搜索框固定成 80px，这里跟随自适应宽度 */
-	.dl-admin-page .dl-admin-table .search-box input{width:100% !important}
+	.dl-admin-page .dl-admin-table .search-box{flex:1 1 140px;min-width:0}
+	/* 核心移动端规则把 admin 搜索框固定成 80px，这里跟随自适应宽度；
+	   输入框自带 50px 右内边距（给放大镜按钮留位），必须用 border-box 计算，
+	   否则实际宽度会比父容器多出 50px，盖住右侧的刷新/批量删除按钮 */
+	.dl-admin-page .dl-admin-table .search-box input{width:100% !important;box-sizing:border-box}
 	.dl-admin-page .dl-admin-user-filter{margin-left:0}
 	.dl-admin-page .dl-admin-date-range{margin-left:0}
 	.dl-admin-page .dl-admin-user-dropdown{max-width:calc(100vw - 40px)}
@@ -231,4 +233,94 @@ html.dark-mode .dl-admin-page .dl-url-wrap .do-action:hover{color:#4aa3ff;backgr
 	.dl-admin-page .dl-admin-title h2{font-size:15px}
 	.dl-admin-page .dl-admin-stats .label{font-size:12px;padding:.25em .6em}
 	.dl-admin-page .dl-admin-table .toolbar .right .btn{padding:4px 8px}
+}
+
+/* ===== 手机卡片布局（≤768）=====
+   8 列横向滚动在手机上只能看到前两列，改为卡片：
+   第一行 勾选 + 文件名 + 开关，第二行整行直链，第三行 用户/时间/访问量 + 操作。
+   选择器带上 .content .dl-admin-list-table 才能压过核心
+   .kodTable .content .list-table .list-row 的表格行规则。 */
+@media (max-width: 768px){
+	.dl-admin-page .dl-admin-table .content{overflow-x:hidden}
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table{display:block;width:auto;min-width:0;table-layout:auto;border-collapse:separate}
+
+	/* 表头：只保留全选框，其余列名隐藏 */
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row.title{display:flex;align-items:center;padding:6px 10px}
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row.title .list-col{display:none}
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row.title .col-check{display:flex;align-items:center;padding:0}
+
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row.row-content{
+		display:grid;
+		grid-template-columns:auto minmax(0,1fr) auto auto auto;
+		grid-template-areas:
+			"check name name name status"
+			"url url url url url"
+			"user user time views act";
+		align-items:center;gap:6px 10px;padding:10px;border-bottom:1px solid #f0f0f0;
+	}
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row.row-content:nth-child(odd){background:transparent}
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row.row-content:last-child{border-bottom:none}
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row .list-col{
+		padding:0;width:auto;min-width:0;white-space:normal;text-overflow:clip;overflow:visible;
+	}
+
+	.dl-admin-page .dl-admin-table .col-check{grid-area:check}
+	.dl-admin-page .dl-admin-table .col-name{grid-area:name;min-width:0}
+	.dl-admin-page .dl-admin-table .col-url{grid-area:url;min-width:0}
+	.dl-admin-page .dl-admin-table .col-user{grid-area:user;min-width:0;max-width:140px}
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row .col-time{grid-area:time;white-space:nowrap}
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row .col-views{grid-area:views;white-space:nowrap}
+	.dl-admin-page .dl-admin-table .col-status{grid-area:status;justify-self:end}
+	.dl-admin-page .dl-admin-table .col-act{grid-area:act;justify-self:end;display:flex;align-items:center;gap:2px}
+	/* 直链条内已有复制按钮，操作列不再重复 */
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row .col-act .dl-admin-copy{display:none}
+	.dl-admin-page .dl-admin-table .col-status label em{margin-right:0}
+
+	.dl-admin-page .dl-admin-table .dl-admin-meta{font-size:12px}
+	.dl-admin-page .dl-admin-table .col-user .dl-admin-user{display:flex;min-width:0}
+	.dl-admin-page .dl-admin-table .col-user .dl-admin-user-name{min-width:0}
+
+	/* 直链做成整行可点的浅色块 */
+	.dl-admin-page .dl-admin-table .dl-url-wrap{
+		min-width:0;gap:4px;padding:2px 2px 2px 8px;
+		background:#f6f8fb;border:1px solid #eef0f3;border-radius:4px;
+	}
+	.dl-admin-page .dl-admin-table .dl-url-wrap a{font-size:12px}
+	.dl-admin-page .dl-admin-table .dl-url-wrap .do-action{width:28px;height:28px;line-height:28px;font-size:15px}
+	.dl-admin-page .dl-admin-table .col-act .do-action{width:28px;height:28px;line-height:28px;font-size:15px;box-sizing:border-box}
+
+	html.dark-mode .dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row.row-content{border-bottom-color:rgba(255,255,255,.08)}
+	/* 核心用 .list-row:after 画分隔线，暗色下需要一起改色 */
+	html.dark-mode .dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row.row-content:after{border-top-color:rgba(255,255,255,.08)}
+	html.dark-mode .dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row.row-content:last-child:after{display:none}
+	html.dark-mode .dl-admin-page .dl-admin-table .dl-url-wrap{background:rgba(255,255,255,.05);border-color:rgba(255,255,255,.1)}
+
+	/* 日期筛选：原生日历图标与左侧自定义图标重复，且把输入区挤得很窄。
+	   隐藏原生图标（保留整块可点区域，点击任意位置都会弹出日期选择器），
+	   两个输入框均分整行、高度加大到适合手指操作 */
+	.dl-admin-page .dl-admin-date-range{flex:1 1 100%;margin-left:0;height:34px;padding:0 8px 0 6px}
+	.dl-admin-page .dl-admin-date-range .dl-admin-date-start,
+	.dl-admin-page .dl-admin-date-range .dl-admin-date-end{
+		position:relative;flex:1 1 0;min-width:0;width:auto;height:32px;font-size:13px;text-align:center;
+	}
+	.dl-admin-page .dl-admin-date-range .dl-admin-date-start::-webkit-calendar-picker-indicator,
+	.dl-admin-page .dl-admin-date-range .dl-admin-date-end::-webkit-calendar-picker-indicator{
+		position:absolute;left:0;top:0;right:0;bottom:0;
+		width:100%;height:100%;opacity:0;cursor:pointer;
+	}
+	.dl-admin-page .dl-admin-date-range .dl-date-sep{margin:0 4px}
+}
+
+/* 窄屏（≤430）：创建时间占位太宽会把“创建用户”挤成省略号，这里优先保留用户；
+   时间列隐藏后网格轨道自动收缩，文件名与用户都能完整显示 */
+@media (max-width: 430px){
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row .col-time{display:none}
+}
+
+/* 超窄屏（≤380）：压缩用户列与操作按钮，保证第三行不换行溢出 */
+@media (max-width: 380px){
+	.dl-admin-page .dl-admin-table .content .dl-admin-list-table .list-row.row-content{gap:6px 6px;padding:10px 8px}
+	.dl-admin-page .dl-admin-table .col-user{max-width:110px}
+	.dl-admin-page .dl-admin-table .dl-admin-meta{font-size:11px}
+	.dl-admin-page .dl-admin-table .col-act .do-action{width:24px;height:24px;line-height:24px;font-size:14px}
 }

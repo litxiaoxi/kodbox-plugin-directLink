@@ -210,7 +210,7 @@ ClassBase.define({
 		});
 		this.$('.panel-body').delegate('.dl-admin-copy', 'click', function(){
 			var url = $(this).attr('data-url');
-			copyText(url);
+			DLAdmin.copyText(url);
 			Tips.tips(LNG['dl.tips.copied']);
 		});
 		this.$('.panel-body').delegate('.dl-admin-toggle', 'change', function(){
@@ -221,7 +221,7 @@ ClassBase.define({
 		this.$('.panel-body').delegate('.dl-admin-remove', 'click', function(){
 			var id = Number($(this).attr('data-id'));
 			var name = $(this).attr('data-name') || '';
-			var content = '<h5>' + esc(LNG['dl.page.confirmDeleteInfo']) + '</h5>' + esc(name);
+			var content = '<h5>' + DLAdmin.esc(LNG['dl.page.confirmDeleteInfo']) + '</h5>' + DLAdmin.esc(name);
 			$.dialog.confirm(content, function(){
 				self.remove([id]);
 			}, false, LNG['common.delete'] || LNG['dl.page.delete']);
@@ -308,9 +308,9 @@ ClassBase.define({
 			var u = this.state.users[i];
 			var name = u.nickName || u.name || ('#' + u.userID);
 			html += '<div class="dl-admin-user-option' + (Number(u.userID) === Number(s.userID) ? ' active' : '') + '"'
-				+ ' data-id="' + Number(u.userID) + '" data-name="' + esc(name) + '">'
-				+ avatarHtml(u.avatar)
-				+ '<span class="dl-admin-user-option-name">' + esc(name) + '</span>'
+				+ ' data-id="' + Number(u.userID) + '" data-name="' + DLAdmin.esc(name) + '">'
+				+ DLAdmin.avatarHtml(u.avatar)
+				+ '<span class="dl-admin-user-option-name">' + DLAdmin.esc(name) + '</span>'
 				+ '<em>' + Number(u.num || 0) + '</em></div>';
 		}
 		this.$('.dl-admin-user-dropdown').html(html);
@@ -347,32 +347,32 @@ ClassBase.define({
 			var userName = userInfo.nickName || userInfo.name || ('#' + item.userID);
 			var url = String(item.url || '');
 			var cover = item.cover
-				? '<img src="' + esc(item.cover) + '" alt="" loading="lazy" onerror="this.remove()">'
+				? '<img src="' + DLAdmin.esc(item.cover) + '" alt="" loading="lazy" onerror="this.remove()">'
 				: '';
 			var path = String(item.path || '');
 			html += '<div class="list-row row-content" data-id="' + Number(item.id) + '">'
 				+ '<div class="list-col col-check"><input type="checkbox" class="kui-checkbox size-small dl-admin-check" data-id="' + Number(item.id) + '"></div>'
 				+ '<div class="list-col col-name"><div class="dl-file-cell">'
-				+ '<span class="dl-file-thumb dl-open-location" data-path="' + esc(path) + '" title="' + esc(item.name) + '"><i class="font-icon ' + fileIcon(item.ext) + '"></i>' + cover + '</span>'
+				+ '<span class="dl-file-thumb dl-open-location" data-path="' + DLAdmin.esc(path) + '" title="' + DLAdmin.esc(item.name) + '"><i class="font-icon ' + DLAdmin.fileIcon(item.ext) + '"></i>' + cover + '</span>'
 				+ '<div class="dl-file-main">'
-				+ '<span class="dl-admin-file-name dl-open-location" data-path="' + esc(path) + '" title="' + esc(item.name) + '">' + esc(item.name || '--') + '</span>'
+				+ '<span class="dl-admin-file-name dl-open-location" data-path="' + DLAdmin.esc(path) + '" title="' + DLAdmin.esc(item.name) + '">' + DLAdmin.esc(item.name || '--') + '</span>'
 				+ '</div></div></div>'
 				+ '<div class="list-col col-url"><div class="dl-url-wrap">'
-				+ '<a href="' + esc(url) + '" target="_blank" rel="noopener" title="' + esc(url) + '">' + esc(url) + '</a>'
-				+ '<i class="do-action font-icon ri-file-copy-line dl-admin-copy" data-url="' + esc(url) + '" title="' + LNG['dl.page.copy'] + '"></i>'
+				+ '<a href="' + DLAdmin.esc(url) + '" target="_blank" rel="noopener" title="' + DLAdmin.esc(url) + '">' + DLAdmin.esc(url) + '</a>'
+				+ '<i class="do-action font-icon ri-file-copy-line dl-admin-copy" data-url="' + DLAdmin.esc(url) + '" title="' + LNG['dl.page.copy'] + '"></i>'
 				+ '</div></div>'
-				+ '<div class="list-col col-user"><span class="dl-admin-user" data-id="' + Number(item.userID) + '" data-name="' + esc(userName) + '" title="' + esc(userName) + '">'
-				+ avatarHtml(userInfo.avatar) + '<span class="dl-admin-user-name">' + esc(userName) + '</span></span></div>'
-				+ '<div class="list-col col-time"><span class="dl-admin-meta">' + esc(formatTime(item.createTime)) + '</span></div>'
-				+ '<div class="list-col col-views"><span class="dl-admin-meta"><b>' + Number(item.numView || 0) + '</b> / ' + Number(item.numDownload || 0) + '</span></div>'
+				+ '<div class="list-col col-user"><span class="dl-admin-user" data-id="' + Number(item.userID) + '" data-name="' + DLAdmin.esc(userName) + '" title="' + DLAdmin.esc(userName) + '">'
+				+ DLAdmin.avatarHtml(userInfo.avatar) + '<span class="dl-admin-user-name">' + DLAdmin.esc(userName) + '</span></span></div>'
+				+ '<div class="list-col col-time"><span class="dl-admin-meta">' + DLAdmin.esc(DLAdmin.formatTime(item.createTime)) + '</span></div>'
+				+ '<div class="list-col col-views"><span class="dl-admin-meta"><b>' + Number(item.numView || 0) + '</b></span></div>'
 				+ '<div class="list-col col-status"><label>'
 				+ '<input type="checkbox" class="kui-checkbox-ios size-small dl-admin-toggle" data-id="' + Number(item.id) + '"'
-				+ (on ? ' checked' : '') + ' title="' + esc(on ? LNG['dl.page.disable'] : LNG['dl.page.enable']) + '"><em></em>'
+				+ (on ? ' checked' : '') + ' title="' + DLAdmin.esc(on ? LNG['dl.page.disable'] : LNG['dl.page.enable']) + '"><em></em>'
 				+ '</label></div>'
 				+ '<div class="list-col setting col-act">'
-				+ '<i class="do-action font-icon ri-file-copy-line dl-admin-copy" data-url="' + esc(url) + '" title="' + LNG['dl.page.copy'] + '"></i>'
-				+ '<a class="do-action font-icon ri-external-link-line" href="' + esc(url) + '" target="_blank" rel="noopener" title="' + LNG['dl.page.open'] + '"></a>'
-				+ '<i class="do-action font-icon ri-delete-bin-line-6 dl-admin-remove" data-id="' + Number(item.id) + '" data-name="' + esc(item.name || '') + '" title="' + LNG['dl.page.delete'] + '"></i>'
+				+ '<i class="do-action font-icon ri-file-copy-line dl-admin-copy" data-url="' + DLAdmin.esc(url) + '" title="' + LNG['dl.page.copy'] + '"></i>'
+				+ '<a class="do-action font-icon ri-external-link-line" href="' + DLAdmin.esc(url) + '" target="_blank" rel="noopener" title="' + LNG['dl.page.open'] + '"></a>'
+				+ '<i class="do-action font-icon ri-delete-bin-line-6 dl-admin-remove" data-id="' + Number(item.id) + '" data-name="' + DLAdmin.esc(item.name || '') + '" title="' + LNG['dl.page.delete'] + '"></i>'
 				+ '</div></div>';
 		}
 		if(html) table.append(html);
@@ -438,7 +438,7 @@ ClassBase.define({
 
 	setStatus: function(id, status){
 		var self = this;
-		kodApi.requestSend('plugin/dl/adminSetStatus', {id:id, status:status, CSRF_TOKEN:csrfToken()}, function(result){
+		kodApi.requestSend('plugin/dl/adminSetStatus', {id:id, status:status, CSRF_TOKEN:DLAdmin.csrfToken()}, function(result){
 			if(result && result.code){
 				self.loadList();
 			}else{
@@ -450,7 +450,7 @@ ClassBase.define({
 
 	remove: function(ids){
 		var self = this;
-		kodApi.requestSend('plugin/dl/adminRemove', {ids:ids.join(','), CSRF_TOKEN:csrfToken()}, function(result){
+		kodApi.requestSend('plugin/dl/adminRemove', {ids:ids.join(','), CSRF_TOKEN:DLAdmin.csrfToken()}, function(result){
 			if(result && result.code){
 				Tips.tips(LNG['explorer.success']);
 				self.state.selected = {};
@@ -475,71 +475,68 @@ ClassBase.define({
 		}
 		if(!ids.length) return;
 		var tip = names.length > 1
-			? esc(names[0]) + '... <span class="label label-warning border-circle">' + ids.length + LNG['dl.admin.items'] + '</span>'
-			: esc(names[0] || '');
-		var content = '<h5>' + esc(LNG['dl.admin.confirmDel']) + '</h5>' + tip;
+			? DLAdmin.esc(names[0]) + '... <span class="label label-warning border-circle">' + ids.length + LNG['dl.admin.items'] + '</span>'
+			: DLAdmin.esc(names[0] || '');
+		var content = '<h5>' + DLAdmin.esc(LNG['dl.admin.confirmDel']) + '</h5>' + tip;
 		$.dialog.confirm(content, function(){
 			self.remove(ids);
 		}, false, LNG['common.delete'] || LNG['dl.page.delete']);
 	},
 });
 
-function csrfToken(){
-	var match = document.cookie.match(/(?:^|;\s*)CSRF_TOKEN=([^;]+)/);
-	return match ? decodeURIComponent(match[1]) : '';
-}
-
-// 核心 $.copyText 在非安全上下文/权限被拒时返回 rejected Promise，统一兜底
-function copyText(text){
-	var fallback = function(){
-		var area = document.createElement('textarea');
-		area.value = text;
-		area.style.cssText = 'position:fixed;left:-9999px;top:0;';
-		document.body.appendChild(area);
-		area.select();
-		try{ document.execCommand('copy'); }catch(e){}
-		document.body.removeChild(area);
-	};
-	try{
-		var res = $.copyText(text);
-		if(res && res.catch) res.catch(fallback);
-	}catch(e){
-		fallback();
+/* 工具函数统一挂到 __DL_ADMIN__，避免向核心管理窗口注入 esc/fileIcon 等通用全局名 */
+var DLAdmin = window.__DL_ADMIN__ = {
+	csrfToken: function(){
+		var match = document.cookie.match(/(?:^|;\s*)CSRF_TOKEN=([^;]+)/);
+		return match ? decodeURIComponent(match[1]) : '';
+	},
+	// 核心 $.copyText 在非安全上下文/权限被拒时返回 rejected Promise，统一兜底
+	copyText: function(text){
+		var fallback = function(){
+			var area = document.createElement('textarea');
+			area.value = text;
+			area.style.cssText = 'position:fixed;left:-9999px;top:0;';
+			document.body.appendChild(area);
+			area.select();
+			try{ document.execCommand('copy'); }catch(e){}
+			document.body.removeChild(area);
+		};
+		try{
+			var res = $.copyText(text);
+			if(res && res.catch) res.catch(fallback);
+		}catch(e){
+			fallback();
+		}
+	},
+	esc: function(str){
+		return String(str == undefined ? '' : str)
+			.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+			.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+	},
+	avatarHtml: function(avatar){
+		return '<span class="dl-avatar">'
+			+ (avatar ? '<img src="' + DLAdmin.esc(avatar) + '" alt="" loading="lazy" onerror="this.remove()">' : '')
+			+ '<i class="font-icon ri-user-line"></i></span>';
+	},
+	fileIcon: function(ext){
+		ext = String(ext || '').toLowerCase();
+		if(['jpg','jpeg','png','gif','webp','bmp','avif','heic','heif','svg','ico'].indexOf(ext) >= 0) return 'ri-image-line';
+		if(['mp4','mov','m4v','avi','mkv','wmv','flv','webm','mpg','mpeg','3gp','rmvb','rm'].indexOf(ext) >= 0) return 'ri-movie-line';
+		if(['mp3','wav','flac','aac','ogg','m4a','wma','ape'].indexOf(ext) >= 0) return 'ri-music-line';
+		if(ext === 'pdf') return 'ri-file-pdf-line';
+		if(ext === 'doc' || ext === 'docx') return 'ri-file-word-line';
+		if(ext === 'xls' || ext === 'xlsx' || ext === 'csv') return 'ri-file-excel-line';
+		if(ext === 'ppt' || ext === 'pptx') return 'ri-file-ppt-line';
+		if(['zip','rar','7z','tar','gz','bz2','xz'].indexOf(ext) >= 0) return 'ri-file-zip-line';
+		if(['txt','md','log','json','xml','ini','conf'].indexOf(ext) >= 0) return 'ri-file-text-line';
+		if(['html','htm','js','css','php','py','java','c','cpp','sh'].indexOf(ext) >= 0) return 'ri-file-code-line';
+		return 'ri-file-line';
+	},
+	pad: function(n){ return n < 10 ? '0' + n : '' + n; },
+	formatTime: function(sec){
+		if(!sec) return '--';
+		var d = new Date(sec * 1000);
+		return d.getFullYear() + '-' + DLAdmin.pad(d.getMonth()+1) + '-' + DLAdmin.pad(d.getDate())
+			+ ' ' + DLAdmin.pad(d.getHours()) + ':' + DLAdmin.pad(d.getMinutes());
 	}
-}
-
-function esc(str){
-	return String(str == undefined ? '' : str)
-		.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
-		.replace(/"/g,'&quot;').replace(/'/g,'&#39;');
-}
-
-function avatarHtml(avatar){
-	return '<span class="dl-avatar">'
-		+ (avatar ? '<img src="' + esc(avatar) + '" alt="" loading="lazy" onerror="this.remove()">' : '')
-		+ '<i class="font-icon ri-user-line"></i></span>';
-}
-
-function fileIcon(ext){
-	ext = String(ext || '').toLowerCase();
-	if(['jpg','jpeg','png','gif','webp','bmp','avif','heic','heif','svg','ico'].indexOf(ext) >= 0) return 'ri-image-line';
-	if(['mp4','mov','m4v','avi','mkv','wmv','flv','webm','mpg','mpeg','3gp','rmvb','rm'].indexOf(ext) >= 0) return 'ri-movie-line';
-	if(['mp3','wav','flac','aac','ogg','m4a','wma','ape'].indexOf(ext) >= 0) return 'ri-music-line';
-	if(ext === 'pdf') return 'ri-file-pdf-line';
-	if(ext === 'doc' || ext === 'docx') return 'ri-file-word-line';
-	if(ext === 'xls' || ext === 'xlsx' || ext === 'csv') return 'ri-file-excel-line';
-	if(ext === 'ppt' || ext === 'pptx') return 'ri-file-ppt-line';
-	if(['zip','rar','7z','tar','gz','bz2','xz'].indexOf(ext) >= 0) return 'ri-file-zip-line';
-	if(['txt','md','log','json','xml','ini','conf'].indexOf(ext) >= 0) return 'ri-file-text-line';
-	if(['html','htm','js','css','php','py','java','c','cpp','sh'].indexOf(ext) >= 0) return 'ri-file-code-line';
-	return 'ri-file-line';
-}
-
-function pad(n){ return n < 10 ? '0' + n : '' + n; }
-
-function formatTime(sec){
-	if(!sec) return '--';
-	var d = new Date(sec * 1000);
-	return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate())
-		+ ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
-}
+};

@@ -134,7 +134,7 @@
 			+ '</div></div>'
 			+ '<div class="list-col col-size"><span class="dl-meta">' + esc(formatSize(item.size)) + '</span></div>'
 			+ '<div class="list-col col-time"><span class="dl-meta">' + esc(formatTime(item.createTime)) + '</span></div>'
-			+ '<div class="list-col col-views"><span class="dl-meta"><b>' + Number(item.numView || 0) + '</b> / ' + Number(item.numDownload || 0) + '</span></div>'
+			+ '<div class="list-col col-views"><span class="dl-meta"><b>' + Number(item.numView || 0) + '</b></span></div>'
 			+ '<div class="list-col col-status"><label>'
 			+ '<input type="checkbox" class="kui-checkbox-ios size-small dl-toggle" data-id="' + Number(item.id) + '"'
 			+ (on ? ' checked' : '') + ' title="' + esc(on ? t('disable') : t('enable')) + '"><em></em>'

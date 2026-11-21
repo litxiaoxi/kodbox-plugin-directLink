@@ -68,7 +68,7 @@ https://your-host/index.php?plugin/dl/3f9k2m8q1x7p
 
 1. 将插件放入 kodbox 的插件目录，目录名必须为 `dl`。两种方式任选：
 
-   - **下载安装包**：从 [Releases](https://github.com/litxiaoxi/kodbox-plugin-directLink/releases) 下载 `dl-1.0.5.zip`，解压后得到 `dl` 目录，把整个 `dl` 目录放入 kodbox 的 `plugins/` 下。
+   - **下载安装包**：从 [Releases](https://github.com/litxiaoxi/kodbox-plugin-directLink/releases) 下载 `dl-1.0.6.zip`，解压后得到 `dl` 目录，把整个 `dl` 目录放入 kodbox 的 `plugins/` 下。
    - **克隆仓库**（必须指定目录名为 `dl`）：
 
    ```bash
@@ -76,7 +76,7 @@ https://your-host/index.php?plugin/dl/3f9k2m8q1x7p
    git clone https://github.com/litxiaoxi/kodbox-plugin-directLink.git dl
    ```
 
-   注意：GitHub 自动生成的 Source code (zip) 解压后目录名是仓库名（如 `kodbox-plugin-directLink-1.0.5`），不能直接作为插件目录使用，请使用上面的安装包，或克隆后把目录重命名为 `dl`。
+   注意：GitHub 自动生成的 Source code (zip) 解压后目录名是仓库名（如 `kodbox-plugin-directLink-1.0.6`），不能直接作为插件目录使用，请使用上面的安装包，或克隆后把目录重命名为 `dl`。
 
 2. 登录 kodbox → **后台管理 → 插件中心**，找到「直链分享」并启用。
 3. 打开插件配置，确认「使用权限」为 **所有用户**（否则匿名访客无法访问直链）。
@@ -133,7 +133,7 @@ https://your-host/index.php?plugin/dl/3f9k2m8q1x7p
   `html/htm/xhtml/xht/shtml/shtm/svg/xml/xsl/xslt/js/mjs/swf/hta/mht/mhtml`。
 - 响应头包含 `X-Content-Type-Options: nosniff`、`ETag`、`Last-Modified`，**不输出** `Cache-Control`/`Pragma`/`Expires`。
   浏览器按 RFC 7234 的启发式规则（通常取“距最后修改时间的一定比例”，如 10%）决定本地新鲜期：
-  新鲜期内直接使用本地副本、不产生请求；过期后回源校验，文件未变化返回 `304 Not Modified`（不传输正文、不计访问量）。
+  新鲜期内直接使用本地副本、不产生请求；过期后回源校验，文件未变化返回 `304 Not Modified`（不传输正文，按一次访问计数）。
   直链停用、创建者权限收回或文件删除后，服务端立即返回 404；但浏览器中仍处于启发式新鲜期的副本在过期回源前可能继续展示。
 
 ---

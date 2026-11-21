@@ -334,22 +334,13 @@ class dlPlugin extends PluginBase
 			$download = true;
 		}
 
-		// 条件请求：上面的链接状态、创建者权限、文件存在性校验已经通过，
-		// 缓存副本仍有效时返回 304，由浏览器复用本地文件。停用/失效时不会走到这里。
-		$lastModified = intval(_get($info,'modifyTime',0));
-		$etag = $this->fileEtag($row,$info,$lastModified);
-		if($this->isNotModified($etag,$lastModified)){
-			$this->sendNotModified($etag,$lastModified);
-		}
-		self::$outEtag = $etag;
-		self::$outLastModified = $lastModified;
-
 		// 视频/大文件的分段请求会重复访问同一文件，只按首个请求计数
 		$range = isset($_SERVER['HTTP_RANGE']) ? trim($_SERVER['HTTP_RANGE']) : '';
 		$isRangePart = $range && !preg_match('/^bytes=0-/i',$range);
 
 		$upData = array();
-		// 访问与下载统一计为访问量；同一次访问产生的重复请求（见 markViewed）只计一次
+		// 访问与下载统一计为访问量；同一次访问产生的重复请求（见 markViewed）只计一次。
+		// 304 也是真实访问，须在条件请求返回前计数。
 		if(!$isRangePart && REQUEST_METHOD !== 'HEAD' && $this->markViewed($row)){
 			$upData['numView']      = array('exp','numView + 1');
 			$upData['lastViewTime'] = time();
@@ -366,6 +357,16 @@ class dlPlugin extends PluginBase
 			Model('plugin_dl')->setDataAuto(false);
 			Model('plugin_dl')->where(array('id'=>intval($row['id'])))->save($upData);
 		}
+
+		// 条件请求：上面的链接状态、创建者权限、文件存在性校验已经通过，
+		// 缓存副本仍有效时返回 304，由浏览器复用本地文件。停用/失效时不会走到这里。
+		$lastModified = intval(_get($info,'modifyTime',0));
+		$etag = $this->fileEtag($row,$info,$lastModified);
+		if($this->isNotModified($etag,$lastModified)){
+			$this->sendNotModified($etag,$lastModified);
+		}
+		self::$outEtag = $etag;
+		self::$outLastModified = $lastModified;
 
 		header('X-Content-Type-Options: nosniff');
 		if($download){Hook::trigger('explorer.fileDownload',$row['path']);}
@@ -419,7 +420,7 @@ class dlPlugin extends PluginBase
 	}
 
 	/**
-	 * 304 响应只带校验信息，不输出正文，也不计入访问量。
+	 * 304 响应只带校验信息，不输出正文；访问量已在返回前按同一去重规则计入。
 	 */
 	private function sendNotModified($etag,$lastModified){
 		http_response_code(304);

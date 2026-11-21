@@ -66,14 +66,17 @@ https://your-host/index.php?plugin/dl/3f9k2m8q1x7p
 
 ## 安装
 
-1. 将本仓库放入 kodbox 的插件目录，目录名必须为 `dl`：
+1. 将插件放入 kodbox 的插件目录，目录名必须为 `dl`。两种方式任选：
+
+   - **下载安装包**：从 [Releases](https://github.com/litxiaoxi/kodbox-plugin-directLink/releases) 下载 `dl-1.0.5.zip`，解压后得到 `dl` 目录，把整个 `dl` 目录放入 kodbox 的 `plugins/` 下。
+   - **克隆仓库**（必须指定目录名为 `dl`）：
 
    ```bash
    cd /path/to/kodbox/plugins
    git clone https://github.com/litxiaoxi/kodbox-plugin-directLink.git dl
    ```
 
-   也可以直接上传 `dl` 文件夹到 `plugins/`。
+   注意：GitHub 自动生成的 Source code (zip) 解压后目录名是仓库名（如 `kodbox-plugin-directLink-1.0.5`），不能直接作为插件目录使用，请使用上面的安装包，或克隆后把目录重命名为 `dl`。
 
 2. 登录 kodbox → **后台管理 → 插件中心**，找到「直链分享」并启用。
 3. 打开插件配置，确认「使用权限」为 **所有用户**（否则匿名访客无法访问直链）。

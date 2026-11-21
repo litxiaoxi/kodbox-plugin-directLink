@@ -1,7 +1,7 @@
 # 测试记录
 
-- 版本：dl 1.0
-- 日期：2026-11-17 / 18
+- 版本：dl 1.0.5
+- 日期：2026-11-17 / 18，2026-11-21（条件缓存），2026-11-22（启发式缓存）
 - kodbox：1.71.04
 - PHP：7.4.33（CLI + 内置 Web Server）
 - 数据库：MySQL 8.x（`utf8mb4`）
@@ -22,7 +22,13 @@
 | `.html/.svg/.xml/.mjs/.mhtml` 等 | 强制 `attachment`，不内联执行 | 通过 |
 | 大写扩展名 `.HTML` | 仍强制下载 | 通过 |
 | 图片/普通文件 | `inline` 输出 | 通过 |
-| 直链响应缓存头 | `Cache-Control: private, no-store` | 通过 |
+| 直链响应缓存头 | 不输出 `Cache-Control`/`Pragma`/`Expires`，仅 `ETag` + `Last-Modified` | 通过 |
+| `If-None-Match` 命中（含 `W/` 弱标签、多值列表、`*`） | 304，无正文、无缓存指令 | 通过 |
+| `If-Modified-Since` 不早于修改时间 / 早于修改时间 | 304 / 200 | 通过 |
+| `If-None-Match` 不匹配 + `If-Modified-Since` 命中 | 200（ETag 优先） | 通过 |
+| 304 请求 | 不增加访问量 | 通过 |
+| 停用直链后携带缓存校验头请求 | 404（浏览器本地新鲜期内的副本不回源，可能继续展示） | 通过 |
+| 封面接口 | 仍为 `Cache-Control: private, no-store` | 通过 |
 | `X-Content-Type-Options` | `nosniff` | 通过 |
 | 非法 token / 已停用 / 已删除 | 404 自定义页面 | 通过 |
 | 无效 token 超过 120 次/5 分钟 | 429 + `Retry-After` | 通过 |

@@ -13,6 +13,9 @@ class dlPlugin extends PluginBase
 {
 	// 当前请求是否正在输出直链文件内容（用于覆盖核心默认缓存头）
 	private static $directOut = false;
+	// 直链文件输出的 ETag/Last-Modified；为 null 表示非直链输出（如封面，仍不可缓存）
+	private static $outEtag = null;
+	private static $outLastModified = 0;
 
 	function __construct(){
 		parent::__construct();
@@ -30,17 +33,31 @@ class dlPlugin extends PluginBase
 	}
 
 	/**
-	 * 直链内容输出前覆盖核心默认的 30 天缓存头：
-	 * 直链支持随时停用，不允许浏览器/代理继续使用缓存副本。
+	 * 覆盖核心默认的缓存头：
+	 * - 直链文件不声明显式缓存指令（Cache-Control/Pragma/Expires），
+	 *   只输出 ETag/Last-Modified，由浏览器按 RFC 7234 做启发式缓存；
+	 *   缓存过期后浏览器回源校验，未变化返回 304，链接停用/权限收回时回源即 404。
+	 * - 封面等登录态资源仍保持 no-store。
 	 * 钩子在核心写入默认缓存头之后、输出正文之前触发。
 	 */
 	public function fileOutHeaders($file = '', $fileSize = 0, $filename = '', $ext = ''){
 		if(!self::$directOut) return;
 		self::$directOut = false;
-		header('Cache-Control: private, no-store, max-age=0', true);
-		header('Pragma: no-cache', true);
-		header('Expires: 0', true);
 		header_remove('Cache-Pragma');
+		if(self::$outEtag === null){
+			header('Cache-Control: private, no-store, max-age=0', true);
+			header('Pragma: no-cache', true);
+			header('Expires: 0', true);
+			return;
+		}
+		// 不输出 Cache-Control，交给浏览器按 Last-Modified 启发式决定新鲜期
+		header_remove('Cache-Control');
+		header_remove('Pragma');
+		header_remove('Expires');
+		header('ETag: '.self::$outEtag, true);
+		if(self::$outLastModified > 0){
+			header('Last-Modified: '.gmdate('D, d M Y H:i:s',self::$outLastModified).' GMT', true);
+		}
 	}
 
 	/**
@@ -316,6 +333,17 @@ class dlPlugin extends PluginBase
 		if(in_array($ext,$this->forceDownloadExts())){
 			$download = true;
 		}
+
+		// 条件请求：上面的链接状态、创建者权限、文件存在性校验已经通过，
+		// 缓存副本仍有效时返回 304，由浏览器复用本地文件。停用/失效时不会走到这里。
+		$lastModified = intval(_get($info,'modifyTime',0));
+		$etag = $this->fileEtag($row,$info,$lastModified);
+		if($this->isNotModified($etag,$lastModified)){
+			$this->sendNotModified($etag,$lastModified);
+		}
+		self::$outEtag = $etag;
+		self::$outLastModified = $lastModified;
+
 		// 视频/大文件的分段请求会重复访问同一文件，只按首个请求计数
 		$range = isset($_SERVER['HTTP_RANGE']) ? trim($_SERVER['HTTP_RANGE']) : '';
 		$isRangePart = $range && !preg_match('/^bytes=0-/i',$range);
@@ -348,6 +376,60 @@ class dlPlugin extends PluginBase
 		self::$directOut = true;
 		IO::fileOut($row['path'],$download,$name);
 		self::$directOut = false;
+		exit;
+	}
+
+	/**
+	 * 直链文件 ETag：优先使用内容 md5（与核心 fileOut 输出的 Etag 一致，
+	 * 已缓存的旧响应在升级后仍可继续命中 304）；
+	 * 远程存储等无 md5 场景退化为 路径 + 大小 + 修改时间。
+	 */
+	private function fileEtag($row,$info,$lastModified){
+		$hash = _get($info,'fileInfo.hashMd5');
+		if(!$hash) $hash = _get($info,'hashMd5');
+		if($hash){
+			return '"'.$hash.'"';
+		}
+		$seed = _get($row,'path','').'|'.intval(_get($info,'size',0)).'|'.intval($lastModified);
+		return '"'.md5($seed).'"';
+	}
+
+	/**
+	 * 条件请求判定（RFC 7232）：If-None-Match 优先，其次 If-Modified-Since。
+	 */
+	private function isNotModified($etag,$lastModified){
+		$inm = isset($_SERVER['HTTP_IF_NONE_MATCH']) ? trim($_SERVER['HTTP_IF_NONE_MATCH']) : '';
+		if($inm !== ''){
+			if($inm === '*') return true;
+			foreach(explode(',',$inm) as $tag){
+				$tag = trim($tag);
+				if($tag === '') continue;
+				// 弱比较：忽略 W/ 前缀（RFC 7232 6.2）
+				if(strncmp($tag,'W/',2) === 0) $tag = substr($tag,2);
+				if($tag === $etag) return true;
+			}
+			return false;
+		}
+		$ims = isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) ? trim($_SERVER['HTTP_IF_MODIFIED_SINCE']) : '';
+		if($ims !== '' && $lastModified > 0){
+			$time = strtotime($ims);
+			if($time !== false && $lastModified <= $time) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * 304 响应只带校验信息，不输出正文，也不计入访问量。
+	 */
+	private function sendNotModified($etag,$lastModified){
+		http_response_code(304);
+		// 与 200/206 输出保持一致的跨域头，避免前端用 fetch 校验缓存时被 CORS 拦截
+		header('Access-Control-Allow-Origin: *', true);
+		// 同样不声明显式缓存指令，新鲜期由浏览器按 RFC 7234 启发式计算
+		header('ETag: '.$etag, true);
+		if($lastModified > 0){
+			header('Last-Modified: '.gmdate('D, d M Y H:i:s',$lastModified).' GMT', true);
+		}
 		exit;
 	}
 

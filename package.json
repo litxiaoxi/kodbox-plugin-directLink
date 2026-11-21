@@ -2,7 +2,7 @@
 	"id":"dl",
 	"name":"{{LNG['dl.meta.name']}}",
 	"title":"{{LNG['dl.meta.title']}}",
-	"version":"1.0.3",
+	"version":"1.0.5",
 	"source":{
 		"className":"font-icon ri-link-m bg-blue-6"
 	},
